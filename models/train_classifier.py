@@ -1,17 +1,29 @@
 import sys
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
+import pickle
+import nltk
+nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
+import pandas as pd
 from sqlalchemy import create_engine
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+from sklearn.metrics import classification_report
+from sklearn.pipeline import Pipeline
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
 
 
 def load_data(database_filepath):
 
     engine = create_engine('sqlite:///' + database_filepath)
-    df = pd.read_sql('YourTableName', engine)
-    X = df[['message', 'genre']]
-    Y = df.drop(['message', 'original', 'genre', 'id'], axis=1)
-    category_names = Y.columns.values
-
+    df = pd.read_sql('MessageAndCategories', engine)
+    # df = df[(df["category:confidence"] == 1) & (df['category'] != 'Exclude')]
+    X = df.message.values
+    Y_df = df.drop(['message', 'original', 'genre', 'id'], axis=1)
+    Y = Y_df.values
+    category_names = Y_df.columns.values
     return X, Y, category_names
 
 
@@ -28,16 +40,41 @@ def tokenize(text):
 
     return clean_tokens
 
+
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(stop_words='english', tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    # specify parameters for grid search
+    parameters = {
+        'clf__estimator__min_samples_split': (2, 10, 20),
+        'clf__estimator__criterion': ('gini', 'entropy')
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+
+    y_pred = model.predict(X_test)
+
+    df_y_pred = pd.DataFrame(data=y_pred, columns=category_names)
+    df_y_test = pd.DataFrame(data=Y_test, columns=category_names)
+
+    for column in df_y_test:
+        print("------------ {} -------------".format(column))
+        print(classification_report(df_y_test[column], df_y_pred[column]))
 
 
 def save_model(model, model_filepath):
-    pass
+    pkl_filename = model_filepath
+    with open(pkl_filename, 'wb') as file:
+        pickle.dump(model, file)
 
 
 def main():
