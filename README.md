@@ -3,10 +3,10 @@
 ## Table of Contents
 1. [Description](https://github.com/esther-neumann/disaster_response_pipeline#description)
 2. [Getting Started](https://github.com/esther-neumann/disaster_response_pipeline#getting-started)
-   2.1 [Dependencies](https://github.com/esther-neumann/disaster_response_pipeline#dependencies)
-   2.2 [Installing](https://github.com/esther-neumann/disaster_response_pipeline#installing)
-   2.4 [Executing Program](https://github.com/esther-neumann/disaster_response_pipeline#executing-program)
-   2.4 [Additional Material](https://github.com/esther-neumann/disaster_response_pipeline#additional-material)
+    1. [Dependencies](https://github.com/esther-neumann/disaster_response_pipeline#dependencies)
+    2. [Installing](https://github.com/esther-neumann/disaster_response_pipeline#installing)
+    3. [Executing Program](https://github.com/esther-neumann/disaster_response_pipeline#executing-program)
+    4. [Additional Material](https://github.com/esther-neumann/disaster_response_pipeline#additional-material)
 3. [Acknowledgement](https://github.com/esther-neumann/disaster_response_pipeline#acknowledgements)
  
     
