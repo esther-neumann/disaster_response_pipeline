@@ -4,14 +4,16 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
-    df = messages.merge(categories, on="id")
 
+    df = messages.merge(categories, on="id")
     return df
 
 
 def clean_data(df):
+
     categories = df['categories'].str.split(pat=";", expand=True)
 
     row = categories.iloc[0]
@@ -24,18 +26,17 @@ def clean_data(df):
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
 
-    # df = df.drop(columns="categories")
+    df = df.drop(columns="categories")
     df = pd.concat([df, categories], axis=1)
-
     df = df.drop_duplicates()
 
     return df
 
 
 def save_data(df, database_filename):
-    # ToDo what do they mean with database_filename?
+
     engine = create_engine('sqlite:///' + database_filename)
-    df.to_sql('MessageAndCategories_cat', engine, index=False)
+    df.to_sql('MessageAndCategories', engine, index=False)
 
 
 def main():
