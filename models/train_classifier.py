@@ -96,7 +96,8 @@ def build_model():
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
 
-    # specify parameters for grid search
+    # specify parameters for grid search - only limited paramter, as the training takes to much time,
+    # more testing was done in the jupyter notebooks
     parameters = {
         'vect__max_df': (0.5, 0.75, 1.0),
         'tfidf__use_idf': (True, False),
