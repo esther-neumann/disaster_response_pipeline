@@ -1,8 +1,7 @@
 import sys
 import pickle
 import nltk
-import pandas as pd
-
+import re
 from sqlalchemy import create_engine
 
 from nltk.tokenize import word_tokenize
@@ -19,7 +18,24 @@ nltk.download(['punkt', 'wordnet', 'averaged_perceptron_tagger'])
 
 
 def load_data(database_filepath):
+    """
+    Load Data from specified Database.
 
+    Parameter
+    ---------
+    database_filepath: String
+        path from where Data is loaded
+
+    Returns
+    -------
+    X: Pandas.DataFrame
+        DataFrame with features for training
+    Y: Pandas.DataFrame
+        DataFrame with labels for training
+    category_names: List
+        String with names of all labels for visualization
+
+    """
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql('MessageAndCategories', engine)
 
@@ -34,6 +50,24 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """
+    Tokenize function using nltk to case normalize, lemmatize, and tokenize text.
+
+    Parameter
+    ---------
+    text: String
+        Text which will be tokenized
+
+    Returns
+    -------
+    clean_tokens: List
+        List with all tokens of the text
+
+    """
+    url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    detected_urls = re.findall(url_regex, text)
+    for url in detected_urls:
+        text = text.replace(url, "urlplaceholder")
 
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
@@ -47,6 +81,15 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    ML Pipeline function that process text messages and uses GridSearch to find best paremeters for classifier.
+
+    Returns
+    -------
+    cv:
+        GridSearch element with best parameters for model
+
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(stop_words='english', tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -68,7 +111,21 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Evaluate model for each label.
 
+    Parameter
+    ---------
+    model: GridSearch Element
+        Fitted model with best parameters from GridSearch
+    X_test: List
+        List with features to be predicted
+    Y_test: List
+        List with labels, corresponding to X_test
+    category_names: List
+        String with names of all labels for visualization
+
+    """
     y_pred = model.predict(X_test)
 
     df_y_pred = pd.DataFrame(data=y_pred, columns=category_names)
@@ -80,12 +137,30 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Save trained and fitted model.
+
+    Parameter
+    ---------
+    model: GridSearch Element
+        Fitted model with best parameters from GridSearch
+    model_filepath: String
+        filepath where model is stored
+
+    """
     pkl_filename = model_filepath
     with open(pkl_filename, 'wb') as file:
         pickle.dump(model, file)
 
 
 def main():
+    """
+    Main function of train_classifier.
+
+    Calls each function to first load the Trainingsdata and tokenize it to train and fit a model with it.
+    Which lastly will be stored in a .pkl file.
+
+    """
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))

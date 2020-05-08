@@ -4,7 +4,22 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Load Data (messages and categories) from specified Database.
 
+    Parameter
+    ---------
+    messages_filepath: String
+        path from where Data  (messages) is loaded
+    categories_filepath: String
+        path from where Data (categories) is loaded
+
+    Returns
+    -------
+    df: Pandas.DataFrame
+        merged messages and categories DataFrame
+
+    """
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
 
@@ -13,7 +28,20 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """
+    Clean provided Dataframe by splitting categories in single columns .
 
+    Parameter
+    ---------
+    df: Pandas.DataFrame
+        Dataframe to be cleaned
+
+    Returns
+    -------
+    df: Pandas.DataFrame
+        Cleaned DataFrame
+
+    """
     categories = df['categories'].str.split(pat=";", expand=True)
 
     row = categories.iloc[0]
@@ -34,12 +62,28 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """
+    Save dataframe to specific filepath.
 
+    Parameter
+    ---------
+    df: Pandas.DataFrame
+        Dataframe which is stored
+    database_filename: String
+        path/name to Database where the df is stored in
+
+    """
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('MessageAndCategories', engine, index=False)
 
 
 def main():
+    """
+    Main function of process_data.
+
+    Calls each function to first load the raw data cleans it and stores it back to an Database.
+
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
