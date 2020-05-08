@@ -2,8 +2,9 @@ import sys
 import pickle
 import nltk
 import re
-from sqlalchemy import create_engine
+import pandas as pd
 
+from sqlalchemy import create_engine
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
@@ -99,10 +100,7 @@ def build_model():
     # specify parameters for grid search - only limited paramter, as the training takes to much time,
     # more testing was done in the jupyter notebooks
     parameters = {
-        'vect__max_df': (0.5, 0.75, 1.0),
-        'tfidf__use_idf': (True, False),
-        'clf__estimator__n_estimators': [50, 100, 200],
-        'clf__estimator__min_samples_split': [2, 3, 4],
+        'clf__estimator__min_samples_split': (2, 20),
         'clf__estimator__criterion': ('gini', 'entropy')
     }
 
